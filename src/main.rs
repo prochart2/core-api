@@ -24,6 +24,7 @@ async fn main() -> std::io::Result<()> {
     use crate::routes;
     use dotenv::dotenv;
     use tokio_postgres::NoTls;
+    use std::env;
 
     std::env::set_var("RUST_LOG", "actix_web=debug");
     env_logger::init();
@@ -31,7 +32,10 @@ async fn main() -> std::io::Result<()> {
 
     let config = config::Config::from_env().unwrap();
     let pool = config.pg.create_pool(NoTls).unwrap();
-
+    let port = env::var("PORT")
+        .unwrap_or_else(|_| "8080".to_string())
+        .parse()
+        .expect("PORT must be a number.");
 
     let server = HttpServer::new(move || {
         let cors = Cors::permissive();  // FIXME
@@ -46,9 +50,11 @@ async fn main() -> std::io::Result<()> {
             .configure(routes::app_config)
 
     })
-    .bind(config.server_addr.clone())?
+    .bind((config.server_addr.clone(), port))?
     .run();
-    println!("Server running at http://{}/", config.server_addr);
+    println!("Server running at http://{}:{}/",
+             config.server_addr,
+             port);
 
     server.await
 }
