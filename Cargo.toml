@@ -1,5 +1,5 @@
 [package]
-name = "actix-webapp"
+name = "core-api"
 version = "0.1.0"
 authors = ["tanacchi <q111026d@mail.kyutech.jp>"]
 edition = "2018"
